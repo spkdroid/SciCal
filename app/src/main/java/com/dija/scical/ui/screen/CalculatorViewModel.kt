@@ -50,16 +50,16 @@ class CalculatorViewModel @Inject constructor(
         _state.update { it.copy(display = it.display + text) }
     }
 
-    private fun solve() {
-        viewModelScope.launch {
-            evaluate(_state.value.display, repository.memory.value)
-                .onSuccess {
-                    _state.update { it.copy(result = it.toString()) }
+    private fun solve() = viewModelScope.launch {
+        evaluate(_state.value.display, repository.memory.value)
+            .onSuccess { value ->
+                _state.update { state ->
+                    state.copy(result = value.toPlainString())
                 }
-                .onFailure {
-                    _state.update { it.copy(result = "ERR") }
-                }
-        }
+            }
+            .onFailure {
+                _state.update { state -> state.copy(result = "ERR") }
+            }
     }
 
     private fun handleMemory(m: CalculatorEvent.Memory) {
